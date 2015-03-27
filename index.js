@@ -22,7 +22,7 @@ Cleanup.prototype.finish = function () {
   }
   this.finished = true;
   var errs = [];
-  for (var i = 0; i < this.todo.length; i++) {
+  if (this.todo) for (var i = 0; i < this.todo.length; i++) {
     try {
       var action = this.todo[i];
       action();
