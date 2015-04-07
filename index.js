@@ -16,7 +16,7 @@ Cleanup.prototype.add = function (fn) {
   }
 }
 
-Cleanup.prototype.finish = function () {
+Cleanup.prototype.finish = function (all_done) {
   if (this.finished) {
     throw new Error('already finished');
   }
@@ -25,12 +25,18 @@ Cleanup.prototype.finish = function () {
   if (this.todo) for (var i = 0; i < this.todo.length; i++) {
     try {
       var action = this.todo[i];
-      action();
+      action(next);
     }
     catch (e) {
       errs.push(e);
     }
   }
+  i -= errs.length;
+  function next() {
+    i--;
+    if (i == 0 && typeof all_done === 'function') {
+      all_done(null, errs);
+    }
+  }
   this.todo = null;
-  if (errs.length) throw errs;
 }
