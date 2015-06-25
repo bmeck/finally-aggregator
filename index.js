@@ -23,15 +23,22 @@ Cleanup.prototype.finish = function (all_done) {
   this.finished = true;
   var errs = [];
   if (this.todo) for (var i = 0; i < this.todo.length; i++) {
-    try {
-      var action = this.todo[i];
-      action(next);
-    }
-    catch (e) {
-      errs.push(e);
-    }
+    setImmediate(function (action) {
+      var used = false;
+      function use() {
+        if (used) return;
+        used = true;
+        next();
+      }
+      try {
+        action(use);
+      }
+      catch (e) {
+        errs.push(e);
+        use();
+      }
+    }, this.todo[i]);
   }
-  i -= errs.length;
   function next() {
     i--;
     if (i == 0 && typeof all_done === 'function') {
