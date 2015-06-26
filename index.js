@@ -22,7 +22,8 @@ Cleanup.prototype.finish = function (all_done) {
   }
   this.finished = true;
   var errs = [];
-  if (this.todo) for (var i = 0; i < this.todo.length; i++) {
+  var i = 0;
+  if (this.todo) for (; i < this.todo.length; i++) {
     setImmediate(function (action) {
       var used = false;
       function use() {
@@ -41,9 +42,15 @@ Cleanup.prototype.finish = function (all_done) {
   }
   function next() {
     i--;
+    check_done();
+  }
+  function check_done() {
     if (i == 0 && typeof all_done === 'function') {
-      all_done(null, errs);
+      setImmediate(function () {
+        all_done(null, errs);
+      });
     }
   }
+  check_done();
   this.todo = null;
 }
